@@ -1,0 +1,8 @@
+services:
+    atividades.agentes:
+        container_name: atividades.python
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+        volumes:
+            - .:/app
