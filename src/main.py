@@ -1,22 +1,24 @@
-#!/bin/python3.14
-from agents.injury_agent import InjuryAgent
-from agents.performance_agent import PerformanceAgent
-from agents.tiredness_agent import TirednessAgent
-from environments.fotball_field import FotballField
+from agents.treinador import Treinador
+from agents.reserva import Reserva
+from environments.campo_futebol import CampoFutebol
 from maspy import Admin
 
 
 def main():
+    campo = CampoFutebol()
 
-    environment = FotballField()
+    treinador = Treinador()
 
-    injury_agent = InjuryAgent(agent_name="Injury Agent")
-    performance_agent = PerformanceAgent(agent_name="Performance Agent")
-    tiredness_agent = TirednessAgent(agent_name="Tiredness Agent")
+    # banco de reserva varios agentes
+    reservas = [
+        Reserva("Endrick", posicao="ATA", rendimento=80, cansaco=5),
+        Reserva("Rodrygo", posicao="ATA", rendimento=78, cansaco=10),
+        Reserva("Bruno",   posicao="MEI", rendimento=72, cansaco=15),
+        Reserva("Bremer",  posicao="ZAG", rendimento=74, cansaco=8),
+    ]
 
-    Admin().connect_to(
-        agents=[injury_agent, performance_agent, tiredness_agent], targets=environment
-    )
+    # conecta todos os agentes ao ambiente
+    Admin().connect_to(agents=[treinador, *reservas], targets=campo)
     Admin().start_system()
 
 

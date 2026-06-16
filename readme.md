@@ -1,61 +1,75 @@
 # Atividade: Agentes
 
 # Proposta
-Criar um sistema com dois ou mais agentes utilizando a biblioteca MASPY-ml, biblioteca esta, escrita por alunos de mestrado e IC da UTFPR-PG.
-O sistema criado no presente repositório vem a ser um sistema multi-agentes (SMA), o sistema em questão tera como dominio a gestão em tempo real de atletas de futebol de uma determinada equipe.
-* Objetivos:
-1. Verificar quais atletlas estão em campo.
-2. Reconhecer/Receber informações de como os atletas estão durante a partida (Ex: Cansados, Bom Rendimento, Baixo Rendimento, Lesionados)
-3. Tomar as decisões cabíveis, sobre as informações recebidas.
+Sistema multi-agentes (SMA) escrito com a biblioteca **MASPY-ml** (desenvolvida por
+alunos de mestrado e IC da UTFPR-PG). O domínio é a **gestão em tempo real de uma
+equipe de futebol durante a partida**: a cada poucos segundos um evento aleatório
+altera o status de um atleta (cansaço, queda de rendimento ou lesão) e, quando
+necessário, os agentes **negociam uma substituição** de forma totalmente autônoma
+usando o protocolo **Contract-Net**.
 
-* Agentes
-1. Agente que verifica estado de cansaço dos atletas;
-2. Agente que controla desempenho de atletas;
-3. Agente que verifica atletas lesionados;
-4. Agente que recebe todas as informaçoes e toma as decisões técnicas;
-5. Agente que recebe informações e prepara substituições;
-6. Agente que recebe informações de lesionados;
+## Objetivos
+1. Acompanhar quais atletas estão em campo e seus status (rendimento e cansaço).
+2. Receber, em tempo real, eventos que mudam a condição dos atletas
+   (cansado, baixo rendimento, lesionado).
+3. Tomar a decisão técnica cabível — substituir o atleta — escolhendo o reserva
+   por meio de uma negociação Contract-Net, sem nenhuma intervenção humana.
 
-# Diagrama
+## Tipos de agentes
+1. **Treinador** (`src/agents/treinador.py`) — agente técnico. Acompanha a partida,
+   detecta quem precisa sair e atua como **iniciador** do Contract-Net (abre a vaga,
+   recebe as propostas, escolhe o melhor reserva e efetua a troca).
+2. **Reserva** (`src/agents/reserva.py`) — vários agentes no banco rodando ao mesmo
+   tempo. Cada um atua como **participante** do Contract-Net: ao receber a chamada
+   (CFP), decide se concorre à vaga e envia sua proposta (lance).
 
-![Diagrama](./docs/diagram.png)
+O **ambiente** `CampoFutebol` (`src/environments/campo_futebol.py`) guarda os
+titulares e sorteia os eventos da partida.
+
+## O protocolo Contract-Net (resumo)
+1. **CFP** – o Treinador anuncia a vaga (posição) para todos os reservas.
+2. **Propostas** – cada reserva apto à posição responde com um lance
+   (`rendimento - cansaço`).
+3. **Escolha** – o Treinador seleciona o maior lance.
+4. **Aceite/Recusa** – aceita o vencedor e recusa os demais.
+5. **Execução** – o reserva escolhido entra em campo.
 
 # Bibliotecas
-    * MASPY-ml: https://github.com/laca-is/MASPY
+* MASPY-ml: https://github.com/laca-is/MASPY
+
+# Como rodar (Windows / PowerShell)
+> Requer Python 3.12+ instalado (testado com Python 3.13).
+
+```powershell
+# 1. Criar o ambiente virtual
+python -m venv .venv
+
+# 2. Ativar o ambiente virtual
+.\.venv\Scripts\Activate.ps1
+#   Se der erro de "execução de scripts desabilitada", rode uma vez:
+#   Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+# 3. Instalar as dependências
+pip install -r requirements.txt
+
+# 4. Executar o projeto
+python src\main.py
+```
+
+# Como rodar (Linux / macOS)
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python src/main.py
+```
+
+> A partida dura `NUM_LANCES` lances (definido em `treinador.py`) e então o sistema
+> encerra sozinho. Para interromper antes, use `Ctrl+C`.
 
 # Como rodar via Docker
-* Parte-se  da idéia que se tenha instalado o Docker e Docker Compose em seu ambiente de desenvolvimento
-* Caso não tenha instalado, siga as instruções na documentação oficial: https://www.docker.com/
+* Requer Docker e Docker Compose instalados (https://www.docker.com/).
 
-1. Execute o container
 ```bash
 docker compose up
-``````
-
-# Como rodar manualmente
-* Parte-se da idéia que se tenha o python3.12+ instalado no seu ambiente
-* Caso não tenha instalado veja na documentação oficial como prosseguir a intalação: https://www.python.org/psf-landing/
-
-1. Execute o clone do repositório
-```bash
-git clone git@github.com:lsbrel/atividade_agentes
 ```
-
-2. Vá para o diretório onde se encontra o projeto
-```bash
-cd atividade_agentes
-```
-
-3. (opcional) Crie um ambiente virtual python e ative o mesmo.
-```bash
-python3.14 -m venv . && source bin/activate
-```
-
-4. Instale os pacotes e dependências
-```bash
-python3.14 -r requirements.txt
-```
-5. Execute o projeto
-```bash
-python3.14 src/main.py
-``````
